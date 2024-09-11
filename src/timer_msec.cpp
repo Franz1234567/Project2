@@ -16,7 +16,13 @@ void Timer_msec::init_sampling(int period_ms){
 }
 
 void Timer_msec::init_speed(){
-    TCCR2B = 0;
-    TCCR2B = 0
-    TCNT2 = 0;
+    // timer of 1 second using timer2 (which has 8 bits)
+    TCCR0A = 0;
+    TCCR0B = 0;
+    TCNT0 = 0;
+
+    OCR0A = 124; // see report for explanation about this target count
+    TCCR0B |= (1 << WGM02); // clear timer on compare match
+    TIMSK0 |= (1 << OCIE0A); // set interrupt 
+    TCCR0B |= (1 << CS00) | (1 << CS02); // prescaler of 1024
 }
