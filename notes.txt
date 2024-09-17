@@ -1,0 +1,53 @@
+Part 1
+
+on a rajouté timer0
+
+mettre les calculs pour timer0: 8 bits avec prescaler de 1024 
+--> besoin de compter jusqu'a 125*125 mais on est limité à 256 clock cycles (maximum timer interval pour timer0)
+--> on fait 125 fois un compte un 125 
+
+Part 2
+
+We get the speed with our 1s timer
+MAX ≈ 3000 pps
+
+quand on dépasse 63% de Max time, on enregistre la time constant.
+
+on le fait 10 fois puis moyenne: t = 0.59ms avec ±1990 pps
+
+Part 3
+
+What is the required minimum update rate of the speed controller, if this value should be no less than t/10 ?
+-> f_update >= 1/0.59ms ~ 1695Hz
+
+
+    1)Counting encoder pulses
+    2)Computing speed using a stable time base
+    3)Updating the control output at a required rate
+    4)Storing and transmitting the response to the laptop.
+    5)Stable PWM output at a suitable rate, observing
+
+    State the timing requirements for each task.
+    Tabulate what method you will use to meet each of the four time-critical tasks.
+    Allocate resources (timers, interrupts, etc.) to each task.
+    Support your design choices using calculations.
+    How will you validate that each requirement is met?
+
+1) déja fait avec timer1 + interrupts
+timing requirement: encoder pulses counted every time a change is detected, validate with oscilloscope ?
+
+2) fait avec timer0 (voir plus haut) + interrupts, validatete speed ?? tachometre ?
+
+3) timing requirement: update the PWM at f_update, trigger new interrupt every 0.59ms ? -> find good timer/prescaler, 
+method: proportional controller that calculates error and adapts spee/voltage ??, validate with osciilloscope the PWM duty cycle, see if response when error too big ?
+
+4) Serial transmission in main ? Timing ? not too fast ? (every seconds ?), print current speed, speed ref, error, interrupts ??
+
+5)
+
+
+4 timing tasks:
+-count encoder pulses immediatly
+-compute speed every second
+-update the control of PWM every 0.59ms
+-storing/transmitting to laptop very ??
