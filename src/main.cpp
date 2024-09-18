@@ -19,6 +19,7 @@ const double ref = 2500;
 
 
 int waiting_time_us = 280;
+double duty_cycle = 100;
 bool last_state_A = encA.is_low();
 bool last_state_B = encB.is_low();
 bool curr_state_A;
@@ -32,7 +33,7 @@ Timer_msec timer_speed;
 int  main(){
     Serial.begin(9600);
     led.init();
-    timer_sampling.init_sampling(waiting_time_us);
+    timer_sampling.init_sampling(waiting_time_us, duty_cycle);
     timer_speed.init_speed();
     timer_speed.count_speed  = 0;
     sei();
@@ -106,5 +107,5 @@ ISR(TIMER0_COMPA_vect){
 }
 ISR(TIMER1_COMPA_vect){
   error = control.update(ref, (double)current_speed);
-  
+
 }
