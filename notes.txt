@@ -39,7 +39,7 @@ timing requirement: encoder pulses counted every time a change is detected, vali
 2) fait avec timer0 (voir plus haut) + interrupts, validatete speed ?? tachometre ?
 
 3) timing requirement: update the PWM at f_update, trigger new interrupt every 0.59ms ? -> find good timer/prescaler, 
-method: proportional controller that calculates error and adapts spee/voltage ??, validate with osciilloscope the PWM duty cycle, see if response when error too big ?
+method: proportional controller that calculates error and adapts speed/voltage ??, validate with osciilloscope the PWM duty cycle, see if response when error too big ?
 
 4) Serial transmission in main ? Timing ? not too fast ? (every seconds ?), print current speed, speed ref, error, interrupts ??
 
@@ -50,4 +50,4 @@ method: proportional controller that calculates error and adapts spee/voltage ??
 -count encoder pulses immediatly
 -compute speed every second
 -update the control of PWM every 0.59ms
--storing/transmitting to laptop very ??
+-storing/transmitting to laptop 

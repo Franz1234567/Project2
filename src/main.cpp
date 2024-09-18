@@ -2,16 +2,20 @@
 #include <encoder.h>
 #include <digital_out.h>
 #include <avr/interrupt.h>
+#include <p_controller.h>
 #include <Arduino.h>
 
 Encoder encA(1);
 Encoder encB(2);
 
 Digital_out led(5);
+P_controller control(5);
 
 const int max_speed = 3000;
 const float speed_63_ref = max_speed*0.63;
 bool speed_63_found = 0;
+int current_speed;
+const double ref = 2500;
 
 
 int waiting_time_us = 280;
@@ -94,9 +98,13 @@ ISR(TIMER0_COMPA_vect){
   }
 
   if(timer_speed.count_speed == 125){
-    int speed = encA.count;
+    current_speed = encA.count;
     encA.count = 0;
     timer_speed.count_speed = 0;
-    Serial.println(speed);
+    Serial.println(current_speed);
   }
+}
+ISR(TIMER1_COMPA_vect){
+  error = control.update(ref, (double)current_speed);
+  
 }
