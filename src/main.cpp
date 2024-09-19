@@ -7,49 +7,46 @@
 #include <util/delay.h>
 #include <Arduino.h>
 
-const double Kp = 0.03;
+const double Kp = 0.05;
 
 Encoder encA(1);
 Encoder encB(2);
 
-Digital_out led(5);
+Digital_out led(5); //used to verify period on oscilloscope
 Analog_out analog(4);
 P_controller control(Kp);
 
-const int max_speed = 2260; //2985
+const int max_speed = 2800; 
 const float speed_63_ref = max_speed*0.63;
 bool speed_63_found = 0;
 int current_speed = 0;
-const double ref = 900;
-double duty_cycle_first = 50;
-int duty_cycle = 50;
+const double ref = 100; // reference speed
+double duty_cycle_first = 50; //original duty cycle
+int duty_cycle = 50; //used to change the duty cycle according to u
 
-
-
-int waiting_time_us = 280;
 bool last_state_A = encA.is_low();
 bool last_state_B = encB.is_low();
 bool curr_state_A;
 bool curr_state_B;
 int print_counter1 = 0;
 
-
 Timer_msec timer_speed;
 Timer_msec timer_pulses;
 
-
 int  main(){
     Serial.begin(9600);
-    // led.init();
+    led.init();
     analog.init(duty_cycle_first);
+
     timer_speed.init_speed();
     timer_speed.count_speed  = 0;
+
     timer_pulses.init_pulses_count();
+
     analog.pin_digi.set_hi();
     sei();
     
-    while(1){
-  }
+    while(1){}
 }
 
 ISR(TIMER2_COMPA_vect)
@@ -58,28 +55,20 @@ ISR(TIMER2_COMPA_vect)
       curr_state_A = encA.is_low();
       if(curr_state_A != last_state_A){
         encA.count++;
-        // led.toggle();
+        //led.toggle(); //to verify pulse count
       }
       else{ 
         curr_state_B  = encB.is_low();
-        if(curr_state_B != last_state_B){
-          // encA.count--;
-          // led.toggle();
-        }
       }
     }
     else{
       curr_state_A = encA.is_low();
       if(curr_state_A != last_state_A){
         encA.count--;
-        // led.toggle();
+        //led.toggle(); //to verify pulse count
       }
       else{ 
         curr_state_B  = encB.is_low();
-        if(curr_state_B != last_state_B){
-          // encA.count++;
-          // led.toggle();
-        }
       }
     }
     last_state_A = curr_state_A;
@@ -89,7 +78,7 @@ ISR(TIMER2_COMPA_vect)
 ISR(TIMER0_COMPA_vect){
   timer_speed.count_speed++;
 
-  // if (encA.count == 0){
+  // if (encA.count == 0){ //checking if the motor is running 
   //   timer_speed.count_speed = 0;
   //   speed_63_found = 0;
   // }
@@ -105,53 +94,36 @@ ISR(TIMER0_COMPA_vect){
 
   //   Serial.print("----------Time cst: ");
   //   Serial.print(time_cst);
-  //   Serial.print("ms\n");
+  //   Serial.print("s\n");
   // }
 
-  if(timer_speed.count_speed >= 125){
+  if(timer_speed.count_speed >= 125){ //1s
     current_speed = encA.count;
     encA.count = 0;
     timer_speed.count_speed = 0;
-    Serial.println(current_speed);
-  }
-  // tts les 8 ms, on lit le pin 
-  double u = control.update(ref, (double) current_speed);
-  duty_cycle = u;
-  // duty_cycle = (int) (duty_cycle - u/ref*100);
-  if (duty_cycle > 99){ duty_cycle = 99;}
-  if (duty_cycle < 0){ duty_cycle = 0;}
-  analog.set(duty_cycle);
-
-  print_counter1++;
-    if (print_counter1 >= 3000){
-    Serial.print("d --------> ");
+    Serial.print("Ref: ");
+    Serial.print(ref);
+    Serial.print("--------->Current speed: ");
+    Serial.print(current_speed);
+    Serial.print("------>PWM: ");
     Serial.println(duty_cycle);
-    Serial.print("u --------> ");
-    Serial.println(u);
-    print_counter1 = 0;
+    //led.toggle(); // to verify 1s delay for speed
   }
 
+  double u = control.update(ref, (double) current_speed);
+  duty_cycle = (int) (duty_cycle - u/max_speed*100);
+  if (duty_cycle > 80){ duty_cycle = 80;} //limiting the bound of the duty cycle
+  if (duty_cycle <= 20){ duty_cycle = 20;} //limiting the bound of the duty cycle
+  analog.set(duty_cycle);
+  //led.toggle(); //to verify stable update
 }
 
 ISR(TIMER1_COMPA_vect){
-
-  // double u = control.update(ref, (double) current_speed);
-  // print_counter1++;
-  //   if (print_counter1 >= 15000){
-  //   Serial.print("--------> ");
-  //   Serial.println(u);
-  //   }
-  // float percent = u/max_speed;
-  // duty_cycle = (int) (duty_cycle - u/ref*100);
-  // if (duty_cycle > 99){ duty_cycle = 99;}
-  // if (duty_cycle < 0){ duty_cycle = 0;}
-  // analog.set(duty_cycle);
   analog.pin_digi.set_lo();
-  // led.set_lo();
-
+  //led.set_lo(); // to verify stable pwm
 }
 
 ISR(TIMER1_COMPB_vect){
   analog.pin_digi.set_hi();
-  // led.set_hi();
+  // led.set_hi(); //to verify stable pwm
 }

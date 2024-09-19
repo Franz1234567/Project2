@@ -10,8 +10,8 @@ void Timer_msec::init_pwm(double duty_cycle){
     TCCR1B = 0;
     TCNT1 = 0; // initialize counter value to 0
  
-    OCR1A = (uint16_t) (16000000.0/64) * (80/1000000.0) -1; 
-    OCR1B = (uint16_t) OCR1A * (duty_cycle / 100.0);
+    OCR1A = (16000000.0/64) * (450/1000000.0) -1; 
+    OCR1B = OCR1A * (duty_cycle / 100.0);
 
     TCCR1B |= (1 << WGM12);
 
@@ -33,7 +33,6 @@ void Timer_msec::init_speed(){
 
     OCR0A = (16000000.0/1024.0) * (8.0/1000.0) -1; //124 // see report for explanation about this target count
     TCCR0A |= (1 << WGM01);
-    // TCCR0B |= (1 << WGM02); // clear timer on compare match // useless
     TIMSK0 |= (1 << OCIE0A); // set interrupt 
     TCCR0B |= (1 << CS00) | (1 << CS02); // prescaler of 1024
 }
