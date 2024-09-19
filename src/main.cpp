@@ -112,8 +112,8 @@ ISR(TIMER0_COMPA_vect){
 
   double u = control.update(ref, (double) current_speed);
   duty_cycle = (int) (duty_cycle - u/max_speed*100);
-  if (duty_cycle > 80){ duty_cycle = 80;} //limiting the bound of the duty cycle
-  if (duty_cycle <= 20){ duty_cycle = 20;} //limiting the bound of the duty cycle
+  if (duty_cycle > 95){ duty_cycle = 95;} //limiting the bound of the duty cycle
+  if (duty_cycle <= 5){ duty_cycle = 5;} //limiting the bound of the duty cycle
   analog.set(duty_cycle);
   //led.toggle(); //to verify stable update
 }
