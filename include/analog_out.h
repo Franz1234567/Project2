@@ -8,8 +8,8 @@ class Analog_out
 {
 public:
     Analog_out(int pin);
-    void init(int period_ms = 1000);
-    void set(int duty_cycle);
+    void init();
+    void set(double duty_cycle);
 
 private:
     Timer_msec timer;
@@ -17,4 +17,4 @@ public:
     Digital_out pin_digi;
 };
 
-#endif // ANALOG_OUT_H
+#endif 

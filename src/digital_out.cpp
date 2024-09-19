@@ -14,7 +14,7 @@ void Digital_out::set_hi() {
 }
 
 void Digital_out::set_lo() {
-    PORTB &= ~pinMask; // Set pin high
+    PORTB &= ~pinMask; // Set pin low
 }
 
 void Digital_out::toggle() {

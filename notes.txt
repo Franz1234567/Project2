@@ -9,16 +9,16 @@ mettre les calculs pour timer0: 8 bits avec prescaler de 1024
 Part 2
 
 We get the speed with our 1s timer
-MAX ≈ 3000 pps
+MAX ≈ 2960 pps
 
 quand on dépasse 63% de Max time, on enregistre la time constant.
 
-on le fait 10 fois puis moyenne: t = 0.59ms avec ±1990 pps
+on le fait 10 fois puis moyenne: t = 0.67ms avec ±1870 pps
 
 Part 3
 
 What is the required minimum update rate of the speed controller, if this value should be no less than t/10 ?
--> f_update >= 1/0.59ms ~ 1695Hz
+-> f_update >= 1/0.36ms ~ 2777Hz
 
 
     1)Counting encoder pulses
@@ -51,3 +51,16 @@ method: proportional controller that calculates error and adapts speed/voltage ?
 -compute speed every second
 -update the control of PWM every 0.59ms
 -storing/transmitting to laptop 
+
+Choosing a Prescaler:
+
+If we choose a prescaler of 64, the timer frequency becomes:
+Timer Frequency=16,000,00064=250,000 Hz
+Timer Frequency=6416,000,000​=250,000Hz
+Each timer tick will now be:
+Tick Period=1250,000=4 μs
+Tick Period=250,0001​=4μs
+To get 280 µs, we need:
+OCR2A=280 μs4 μs−1=70−1=69
+OCR2A=4μs280μs​−1=70−1=69
+So, set OCR2A = 69 for 280 µs.

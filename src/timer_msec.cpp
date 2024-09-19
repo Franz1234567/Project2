@@ -4,17 +4,25 @@
 
 Timer_msec::Timer_msec(){}
 
-void Timer_msec::init_sampling(int period_us, double duty_cycle){
+void Timer_msec::init_pwm(double duty_cycle){
     TCCR1A = 0;                    // set timer1 to normal operation (all bits in control registers A and B set to zero)
     TCCR1B = 0;
     TCNT1 = 0;                     // initialize counter value to 0
-    OCR1A = (16000000.0/1024.0) * (period_us/1000000.0) -1;   // assign target count to compare register A (must be less than 65536)
-    OCR1B = (16000000.0/1024.0) * (0.6/1000.0) -1;
-    OCR1C = OCR1A * (duty_cycle/100.0) - 1;
+ 
+    OCR1A = (16000000.0/1024.0) * (0.6/1000.0) -1;
+    OCR1B = OCR1A * (duty_cycle/100.0);
+
+    TCCR1A |= (1 << WGM11);
     TCCR1B |= (1 << WGM12);        // clear the timer on compare match A
+
     TIMSK1 |= (1 << OCIE1A);       // set interrupt on compare match A
     TIMSK1 |= (1 << OCIE1B);       // set interrupt on compare match B
+  
     TCCR1B |= (1 << CS10) | (1 << CS12); // set prescaler to 1024 and start the timer
+}
+
+void Timer_msec::set_duty_cycle(double duty_cycle){
+    OCR1B = OCR1A * (duty_cycle / 100.0);
 }
 
 void Timer_msec::init_speed(){
@@ -24,7 +32,21 @@ void Timer_msec::init_speed(){
     TCNT0 = 0;
 
     OCR0A = 124; // see report for explanation about this target count
+    TCCR0A |= (1 << WGM01);
     TCCR0B |= (1 << WGM02); // clear timer on compare match
     TIMSK0 |= (1 << OCIE0A); // set interrupt 
     TCCR0B |= (1 << CS00) | (1 << CS02); // prescaler of 1024
+}
+
+void Timer_msec::init_pulses_count(){
+    // timer of waiting_time (280us) using timer2 (which has 8 bits)
+    TCCR2A = 0;
+    TCCR2B = 0;
+    TCNT2 = 0;
+
+    OCR2A = 5; // see report for explanation 
+    TCCR2A |= (1 << WGM21);
+    TIMSK2 |= (1 << OCIE2A);
+    TCCR2B |= (1 << CS20) | (1 << CS22);
+
 }

@@ -1,3 +1,6 @@
+#ifndef DIGITAL_OUT_H
+#define DIGITAL_OUT_H
+
 #include <stdint.h>
 
 class Digital_out{
@@ -11,3 +14,5 @@ class Digital_out{
     private:
     uint8_t pinMask;
 };
+
+#endif
