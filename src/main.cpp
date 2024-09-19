@@ -114,31 +114,41 @@ ISR(TIMER0_COMPA_vect){
     timer_speed.count_speed = 0;
     Serial.println(current_speed);
   }
-}
-
-ISR(TIMER1_COMPA_vect){
-
+  // tts les 8 ms, on lit le pin 
   double u = control.update(ref, (double) current_speed);
-  print_counter1++;
-  //   if (print_counter1 >= 15000){
-  //   Serial.print("--------> ");
-  //   Serial.println(u);
-  //   }
-  // float percent = u/max_speed;
-  duty_cycle = (int) (duty_cycle - u/ref*100);
+  duty_cycle = u;
+  // duty_cycle = (int) (duty_cycle - u/ref*100);
   if (duty_cycle > 99){ duty_cycle = 99;}
   if (duty_cycle < 0){ duty_cycle = 0;}
   analog.set(duty_cycle);
-  analog.pin_digi.set_lo();
-  // led.set_lo();
 
-  if (print_counter1 >= 3000){
+  print_counter1++;
+    if (print_counter1 >= 3000){
     Serial.print("d --------> ");
     Serial.println(duty_cycle);
     Serial.print("u --------> ");
     Serial.println(u);
     print_counter1 = 0;
   }
+
+}
+
+ISR(TIMER1_COMPA_vect){
+
+  // double u = control.update(ref, (double) current_speed);
+  // print_counter1++;
+  //   if (print_counter1 >= 15000){
+  //   Serial.print("--------> ");
+  //   Serial.println(u);
+  //   }
+  // float percent = u/max_speed;
+  // duty_cycle = (int) (duty_cycle - u/ref*100);
+  // if (duty_cycle > 99){ duty_cycle = 99;}
+  // if (duty_cycle < 0){ duty_cycle = 0;}
+  // analog.set(duty_cycle);
+  analog.pin_digi.set_lo();
+  // led.set_lo();
+
 }
 
 ISR(TIMER1_COMPB_vect){
