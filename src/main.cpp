@@ -7,21 +7,22 @@
 #include <util/delay.h>
 #include <Arduino.h>
 
-const double Kp = 0.2;
+const double Kp = 0.03;
 
 Encoder encA(1);
 Encoder encB(2);
 
 Digital_out led(5);
-Analog_out analog(5);
+Analog_out analog(4);
 P_controller control(Kp);
 
-const int max_speed = 2928;
+const int max_speed = 2260; //2985
 const float speed_63_ref = max_speed*0.63;
 bool speed_63_found = 0;
 int current_speed = 0;
-const double ref = 2000;
-double duty_cycle = 100;
+const double ref = 900;
+double duty_cycle_first = 50;
+int duty_cycle = 50;
 
 
 
@@ -40,7 +41,7 @@ Timer_msec timer_pulses;
 int  main(){
     Serial.begin(9600);
     // led.init();
-    analog.init(duty_cycle);
+    analog.init(duty_cycle_first);
     timer_speed.init_speed();
     timer_speed.count_speed  = 0;
     timer_pulses.init_pulses_count();
@@ -117,26 +118,25 @@ ISR(TIMER0_COMPA_vect){
 
 ISR(TIMER1_COMPA_vect){
 
-  double u = control.update(ref, (double)current_speed);
+  double u = control.update(ref, (double) current_speed);
   print_counter1++;
-    // if (print_counter1 >= 1500){
-    // Serial.print("--------> ");
-    // Serial.println(u);
-    // }
-  if (u > max_speed){
-    u = max_speed;
-  }
-  else if (u < 0){
-    u = 0;
-  }
-  // double duty_cycle =100 - (u/max_speed)*100;
-  analog.init(20);
+  //   if (print_counter1 >= 15000){
+  //   Serial.print("--------> ");
+  //   Serial.println(u);
+  //   }
+  // float percent = u/max_speed;
+  duty_cycle = (int) (duty_cycle - u/ref*100);
+  if (duty_cycle > 99){ duty_cycle = 99;}
+  if (duty_cycle < 0){ duty_cycle = 0;}
+  analog.set(duty_cycle);
   analog.pin_digi.set_lo();
   // led.set_lo();
 
-  if (print_counter1 >= 15000){
-    Serial.print("--------> ");
+  if (print_counter1 >= 3000){
+    Serial.print("d --------> ");
     Serial.println(duty_cycle);
+    Serial.print("u --------> ");
+    Serial.println(u);
     print_counter1 = 0;
   }
 }

@@ -1,5 +1,6 @@
 #include <timer_msec.h>
 #include <avr/io.h>
+#include <stdint.h>
 
 
 Timer_msec::Timer_msec(){}
@@ -9,8 +10,8 @@ void Timer_msec::init_pwm(double duty_cycle){
     TCCR1B = 0;
     TCNT1 = 0; // initialize counter value to 0
  
-    OCR1A = (16000000.0/64) * (60/1000000.0) -1; 
-    OCR1B = OCR1A * (duty_cycle / 100.0);
+    OCR1A = (uint16_t) (16000000.0/64) * (2000/1000000.0) -1; 
+    OCR1B = (uint16_t) OCR1A * (duty_cycle / 100.0);
 
     TCCR1B |= (1 << WGM12);
 
