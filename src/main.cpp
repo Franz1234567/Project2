@@ -13,14 +13,16 @@ Encoder encA(1);
 Encoder encB(2);
 
 Digital_out led(5);
-Analog_out analog(4);
+Analog_out analog(5);
 P_controller control(Kp);
 
 const int max_speed = 2928;
 const float speed_63_ref = max_speed*0.63;
 bool speed_63_found = 0;
 int current_speed = 0;
-const double ref = 1000;
+const double ref = 2000;
+double duty_cycle = 100;
+
 
 
 int waiting_time_us = 280;
@@ -28,6 +30,7 @@ bool last_state_A = encA.is_low();
 bool last_state_B = encB.is_low();
 bool curr_state_A;
 bool curr_state_B;
+int print_counter1 = 0;
 
 
 Timer_msec timer_speed;
@@ -36,8 +39,8 @@ Timer_msec timer_pulses;
 
 int  main(){
     Serial.begin(9600);
-    led.init();
-    analog.init();
+    // led.init();
+    analog.init(duty_cycle);
     timer_speed.init_speed();
     timer_speed.count_speed  = 0;
     timer_pulses.init_pulses_count();
@@ -54,7 +57,7 @@ ISR(TIMER2_COMPA_vect)
       curr_state_A = encA.is_low();
       if(curr_state_A != last_state_A){
         encA.count++;
-        led.toggle();
+        // led.toggle();
       }
       else{ 
         curr_state_B  = encB.is_low();
@@ -68,7 +71,7 @@ ISR(TIMER2_COMPA_vect)
       curr_state_A = encA.is_low();
       if(curr_state_A != last_state_A){
         encA.count--;
-        led.toggle();
+        // led.toggle();
       }
       else{ 
         curr_state_B  = encB.is_low();
@@ -85,50 +88,60 @@ ISR(TIMER2_COMPA_vect)
 ISR(TIMER0_COMPA_vect){
   timer_speed.count_speed++;
 
-  if (encA.count == 0){
-    timer_speed.count_speed = 0;
-    speed_63_found = 0;
-  }
+  // if (encA.count == 0){
+  //   timer_speed.count_speed = 0;
+  //   speed_63_found = 0;
+  // }
 
-  if((speed_63_ref <= abs(encA.count)) && (speed_63_found == 0)){
-    int speed_63 = encA.count;
-    float time_cst = timer_speed.count_speed * 0.008; // 0.008s each 125 clock cycle (see report for more details)
-    speed_63_found = 1;
+  // if((speed_63_ref <= abs(encA.count)) && (speed_63_found == 0)){
+  //   int speed_63 = encA.count;
+  //   float time_cst = timer_speed.count_speed * 0.008; // 0.008s each 125 clock cycle (see report for more details)
+  //   speed_63_found = 1;
 
-    Serial.print("----------Speed 63%: ");
-    Serial.print(speed_63);
-    Serial.print("pps\n");
+  //   Serial.print("----------Speed 63%: ");
+  //   Serial.print(speed_63);
+  //   Serial.print("pps\n");
 
-    Serial.print("----------Time cst: ");
-    Serial.print(time_cst);
-    Serial.print("ms\n");
-  }
+  //   Serial.print("----------Time cst: ");
+  //   Serial.print(time_cst);
+  //   Serial.print("ms\n");
+  // }
 
   if(timer_speed.count_speed >= 125){
     current_speed = encA.count;
     encA.count = 0;
     timer_speed.count_speed = 0;
-    led.toggle();
     Serial.println(current_speed);
   }
 }
 
 ISR(TIMER1_COMPA_vect){
+
   double u = control.update(ref, (double)current_speed);
+  print_counter1++;
+    // if (print_counter1 >= 1500){
+    // Serial.print("--------> ");
+    // Serial.println(u);
+    // }
   if (u > max_speed){
     u = max_speed;
   }
   else if (u < 0){
     u = 0;
   }
-  double duty_cycle = (u/max_speed)*100;
-  analog.set(duty_cycle);
-  analog.pin_digi.set_hi();
-  // Serial.print("--------> ");
-  // Serial.println(u);
+  // double duty_cycle =100 - (u/max_speed)*100;
+  analog.init(20);
+  analog.pin_digi.set_lo();
+  // led.set_lo();
 
+  if (print_counter1 >= 15000){
+    Serial.print("--------> ");
+    Serial.println(duty_cycle);
+    print_counter1 = 0;
+  }
 }
 
 ISR(TIMER1_COMPB_vect){
-  analog.pin_digi.set_lo();
+  analog.pin_digi.set_hi();
+  // led.set_hi();
 }
